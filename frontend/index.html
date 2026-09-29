@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsurAI | Enterprise Claim Risk & Fraud Detection Platform</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background Ambient Glow Mesh -->
+  <div class="glow-sphere glow-1"></div>
+  <div class="glow-sphere glow-2"></div>
+  <div class="glow-sphere glow-3"></div>
+
+  <!-- ======================================================================= -->
+  <!-- 1. ENTERPRISE AUTHENTICATION SCREEN (LOGIN GATEWAY)                     -->
+  <!-- ======================================================================= -->
+  <div id="login-overlay" class="login-container-wrapper">
+    <div class="login-card glass-card">
+      <div class="login-brand-header">
+        <div class="login-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h2 class="login-title">InsurAI Enterprise</h2>
+        <p class="login-sub">Insurance Claim Risk Scoring & SIU Fraud Adjudication Portal</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleUserLogin(event)">
+        <div class="input-group">
+          <label for="login-officer-id"><i class="fa-solid fa-id-badge"></i> Officer / Adjuster ID</label>
+          <input type="text" id="login-officer-id" value="" required class="glass-input" placeholder="e.g. ADJ-9418" autocomplete="username" />
+        </div>
+
+        <div class="input-group" style="margin-top: 1rem;">
+          <label for="login-email"><i class="fa-solid fa-envelope"></i> Official Insurer Email</label>
+          <input type="email" id="login-email" value="" required class="glass-input" placeholder="e.g. officer@insurai-claims.com" autocomplete="email" />
+        </div>
+
+        <div class="input-group" style="margin-top: 1rem;">
+          <label for="login-role"><i class="fa-solid fa-user-gear"></i> Assigned System Role (Type or Select)</label>
+          <input type="text" list="roles-list" id="login-role" value="" class="glass-input" placeholder="Type or select role..." />
+          <datalist id="roles-list">
+            <option value="Senior Claims Adjudicator">Senior Claims Adjudicator (Fast-Track Settlement)</option>
+            <option value="SIU Fraud Lead Investigator">SIU Fraud Lead Investigator (Forensic Audit)</option>
+            <option value="Underwriting Risk Manager">Underwriting Risk Manager</option>
+            <option value="Claims Review Analyst">Claims Review Analyst</option>
+          </datalist>
+        </div>
+
+        <div class="input-group" style="margin-top: 1rem;">
+          <label for="login-password"><i class="fa-solid fa-key"></i> Security Access Passcode</label>
+          <input type="password" id="login-password" value="" required class="glass-input" placeholder="Enter security passcode" autocomplete="current-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1.75rem;">
+          <i class="fa-solid fa-lock-open"></i> Sign In to Adjudication Portal
+        </button>
+      </form>
+
+      <div class="login-divider"><span>OR FOR RESUME & DEMO EVALUATION</span></div>
+
+      <button class="btn btn-glow btn-full" onclick="handleDemoLogin()">
+        <i class="fa-solid fa-bolt"></i> 1-Click Instant Demo Access
+      </button>
+
+      <div class="login-footer-badge">
+        <i class="fa-solid fa-shield-check"></i> Multi-Model Neural Consensus Engine • FIPS-140 Compliant
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- 2. MAIN APPLICATION (SHOWN AFTER LOGIN)                                 -->
+  <!-- ======================================================================= -->
+  <div id="app-wrapper" style="display: none;">
+
+    <!-- Top Executive Navigation Bar -->
+    <header class="navbar-wrapper">
+      <div class="navbar-content">
+        <div class="brand-section">
+          <div class="brand-logo-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">InsurAI</span>
+            <span class="brand-tagline">Claim Risk Scoring & Fraud Detection Engine</span>
+          </div>
+        </div>
+
+        <nav class="nav-links">
+          <button class="nav-btn active" onclick="switchMainTab('wizard')">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Claim Assessment
+          </button>
+          <button class="nav-btn" onclick="switchMainTab('batch')">
+            <i class="fa-solid fa-layer-group"></i> Batch Processor
+          </button>
+          <button class="nav-btn" onclick="switchMainTab('certificate')">
+            <i class="fa-solid fa-stamp"></i> Settlement Certificate
+          </button>
+          <button class="nav-btn" onclick="switchMainTab('history')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Claim Audit History
+          </button>
+        </nav>
+
+        <div class="nav-user-section">
+          <div class="user-chip">
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="active-user-name">Adjuster</span>
+          </div>
+          <button class="btn-logout" onclick="handleUserLogout()" title="Sign Out">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-main-container">
+
+      <!-- =================================================================== -->
+      <!-- TAB 1: CLAIM ASSESSMENT WIZARD                                      -->
+      <!-- =================================================================== -->
+      <section id="tab-wizard" class="tab-view active">
+        
+        <!-- Stepper Progress Header -->
+        <div class="stepper-card">
+          <div class="step-indicator active" id="step-node-1" onclick="jumpToStep(1)">
+            <div class="step-circle">1</div>
+            <div class="step-label">Policyholder Profile</div>
+          </div>
+          <div class="step-connector" id="connector-1"></div>
+          <div class="step-indicator" id="step-node-2" onclick="jumpToStep(2)">
+            <div class="step-circle">2</div>
+            <div class="step-label">Vehicle & Terms</div>
+          </div>
+          <div class="step-connector" id="connector-2"></div>
+          <div class="step-indicator" id="step-node-3" onclick="jumpToStep(3)">
+            <div class="step-circle">3</div>
+            <div class="step-label">Incident Diagnostics</div>
+          </div>
+          <div class="step-connector" id="connector-3"></div>
+          <div class="step-indicator" id="step-node-4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Adjudication Verdict</div>
+          </div>
+        </div>
+
+        <!-- Quick Preset Toolbar -->
+        <div class="preset-toolbar glass-card-sm">
+          <div class="preset-label">
+            <i class="fa-solid fa-bolt-lightning"></i> Fast Scenario Preset:
+          </div>
+          <div class="preset-pills">
+            <button class="preset-pill" onclick="loadPreset('minor')">🟢 Minor Scratch (Low Risk)</button>
+            <button class="preset-pill" onclick="loadPreset('highway')">🟡 Multi-Car Collision (Standard)</button>
+            <button class="preset-pill" onclick="loadPreset('theft')">🔴 Luxury Theft (High Risk)</button>
+            <button class="preset-pill" onclick="loadPreset('staged')">🚨 Staged Total Loss (Critical)</button>
+            <button class="preset-pill reset" onclick="resetWizardForm()"><i class="fa-solid fa-rotate-right"></i> Reset to Null/0</button>
+          </div>
+        </div>
+
+        <!-- WIZARD STEP 1: POLICYHOLDER PROFILE -->
+        <div class="wizard-step-pane active" id="wizard-pane-1">
+          <div class="glass-card">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-user-shield"></i> Step 1: Policyholder & Historical Profile</h3>
+              <p>Type custom text or select verified customer demographics, relationship tenure, and loss history.</p>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="input-group">
+                <label for="customer_age">Policyholder Age (Years)</label>
+                <input type="number" id="customer_age" min="18" max="95" value="" placeholder="e.g. 38" class="glass-input" />
+              </div>
+
+              <div class="input-group">
+                <label for="months_as_customer">Customer Tenure (Months)</label>
+                <input type="number" id="months_as_customer" min="0" max="600" value="" placeholder="e.g. 60" class="glass-input" />
+              </div>
+
+              <div class="input-group">
+                <label for="previous_claims">Historical Claims Lodged</label>
+                <input type="number" id="previous_claims" min="0" max="15" value="0" placeholder="0" class="glass-input" />
+              </div>
+
+              <div class="input-group">
+                <label for="insured_sex">Insured Gender (Type or Select)</label>
+                <input type="text" list="sex-list" id="insured_sex" value="" placeholder="Type or select gender (e.g. MALE)" class="glass-input" />
+                <datalist id="sex-list">
+                  <option value="MALE"></option>
+                  <option value="FEMALE"></option>
+                  <option value="OTHER"></option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="insured_education_level">Education Level (Type or Select)</label>
+                <input type="text" list="education-list" id="insured_education_level" value="" placeholder="Type or select education (e.g. College)" class="glass-input" />
+                <datalist id="education-list">
+                  <option value="College">College / Bachelor Degree</option>
+                  <option value="High School">High School Diploma</option>
+                  <option value="Associate">Associate Degree</option>
+                  <option value="Masters">Masters / Graduate Degree</option>
+                  <option value="PhD">PhD / Doctorate</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="insured_occupation">Occupation Category (Type or Select)</label>
+                <input type="text" list="occupation-list" id="insured_occupation" value="" placeholder="Type or select occupation (e.g. Manager)" class="glass-input" />
+                <datalist id="occupation-list">
+                  <option value="Manager">Executive / Manager</option>
+                  <option value="Engineer">Engineer / IT Professional</option>
+                  <option value="Doctor">Healthcare / Doctor / Medical</option>
+                  <option value="Lawyer">Legal / Attorney / Lawyer</option>
+                  <option value="Sales">Sales & Marketing</option>
+                  <option value="Teacher">Academic / Teacher / Professor</option>
+                  <option value="Technician">Technician / Trades / Crafts</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="policy_state">Policy Jurisdiction State (Type or Select)</label>
+                <input type="text" list="state-list" id="policy_state" value="" placeholder="Type or select state (e.g. OH)" class="glass-input" />
+                <datalist id="state-list">
+                  <option value="OH">Ohio (OH)</option>
+                  <option value="CA">California (CA)</option>
+                  <option value="TX">Texas (TX)</option>
+                  <option value="NY">New York (NY)</option>
+                  <option value="FL">Florida (FL)</option>
+                  <option value="IL">Illinois (IL)</option>
+                  <option value="IN">Indiana (IN)</option>
+                  <option value="PA">Pennsylvania (PA)</option>
+                  <option value="MI">Michigan (MI)</option>
+                </datalist>
+              </div>
+            </div>
+
+            <div class="wizard-actions right-align">
+              <button class="btn btn-primary" onclick="goToStep(2)">Next: Vehicle & Terms <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIZARD STEP 2: VEHICLE & FINANCIAL TERMS -->
+        <div class="wizard-step-pane" id="wizard-pane-2">
+          <div class="glass-card">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-car"></i> Step 2: Vehicle Asset & Coverage Financials</h3>
+              <p>Type custom text or select insured vehicle specifications, claimed indemnity exposure, and policy terms.</p>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="input-group">
+                <label for="auto_make">Vehicle Manufacturer (Type or Select)</label>
+                <input type="text" list="make-list" id="auto_make" value="" placeholder="Type or select make (e.g. BMW)" class="glass-input" />
+                <datalist id="make-list">
+                  <option value="BMW"></option>
+                  <option value="Toyota"></option>
+                  <option value="Honda"></option>
+                  <option value="Tesla"></option>
+                  <option value="Mercedes"></option>
+                  <option value="Audi"></option>
+                  <option value="Ford"></option>
+                  <option value="Hyundai"></option>
+                  <option value="Kia"></option>
+                  <option value="Chevrolet"></option>
+                  <option value="Nissan"></option>
+                  <option value="Volkswagen"></option>
+                  <option value="Dodge"></option>
+                  <option value="Jeep"></option>
+                  <option value="Subaru"></option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="auto_year">Vehicle Model Year (Type or Select)</label>
+                <input type="number" list="year-list" id="auto_year" min="1995" max="2026" value="" placeholder="e.g. 2020" class="glass-input" />
+                <datalist id="year-list">
+                  <option value="2024"></option>
+                  <option value="2023"></option>
+                  <option value="2022"></option>
+                  <option value="2021"></option>
+                  <option value="2020"></option>
+                  <option value="2019"></option>
+                  <option value="2018"></option>
+                  <option value="2015"></option>
+                  <option value="2010"></option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="claim_amount">Total Claim Financial Exposure ($)</label>
+                <input type="number" id="claim_amount" min="500" max="500000" step="500" value="" placeholder="e.g. 45000" class="glass-input" />
+              </div>
+
+              <div class="input-group">
+                <label for="policy_annual_premium">Annual Premium Paid ($)</label>
+                <input type="number" id="policy_annual_premium" min="200" max="15000" step="50" value="" placeholder="e.g. 1250" class="glass-input" />
+              </div>
+
+              <div class="input-group">
+                <label for="policy_deductable">Policy Deductible ($ - Type or Select)</label>
+                <input type="number" list="deductible-list" id="policy_deductable" value="" placeholder="Type or select (e.g. 1000)" class="glass-input" />
+                <datalist id="deductible-list">
+                  <option value="500"></option>
+                  <option value="1000"></option>
+                  <option value="2000"></option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="property_damage">Third-Party Property Damage (Type or Select)</label>
+                <input type="text" list="yesno-list-1" id="property_damage" value="" placeholder="Type or select YES / NO" class="glass-input" />
+                <datalist id="yesno-list-1">
+                  <option value="YES"></option>
+                  <option value="NO"></option>
+                </datalist>
+              </div>
+            </div>
+
+            <div class="wizard-actions flex-between">
+              <button class="btn btn-secondary" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> Back to Step 1</button>
+              <button class="btn btn-primary" onclick="goToStep(3)">Next: Incident Diagnostics <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIZARD STEP 3: INCIDENT DIAGNOSTICS -->
+        <div class="wizard-step-pane" id="wizard-pane-3">
+          <div class="glass-card">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-burst"></i> Step 3: Incident Diagnostics & Verification Evidence</h3>
+              <p>Type custom text or select official accident classification, witness corroboration, and police involvement.</p>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="input-group">
+                <label for="incident_type">Incident Classification (Type or Select)</label>
+                <input type="text" list="incident-type-list" id="incident_type" value="" placeholder="Type or select incident (e.g. Single Vehicle)" class="glass-input" />
+                <datalist id="incident-type-list">
+                  <option value="Single Vehicle">Single Vehicle Collision</option>
+                  <option value="Multi Vehicle">Multi-Vehicle Collision</option>
+                  <option value="Vehicle Theft">Vehicle Theft</option>
+                  <option value="Parked Car">Parked Car Damage</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="incident_severity">Damage Severity Rating (Type or Select)</label>
+                <input type="text" list="severity-list" id="incident_severity" value="" placeholder="Type or select severity (e.g. Major)" class="glass-input" />
+                <datalist id="severity-list">
+                  <option value="Minor">Minor Damage</option>
+                  <option value="Major">Major Structural Damage</option>
+                  <option value="Total Loss">Total Loss / Write-Off</option>
+                  <option value="Trivial">Trivial Scratches</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="collision_type">Primary Point of Impact (Type or Select)</label>
+                <input type="text" list="collision-list" id="collision_type" value="" placeholder="Type or select impact point (e.g. Front)" class="glass-input" />
+                <datalist id="collision-list">
+                  <option value="Front">Front Collision</option>
+                  <option value="Rear">Rear Collision</option>
+                  <option value="Side">Side Impact</option>
+                  <option value="Unknown">Unknown / None</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="authorities_contacted">Authorities Contacted on Scene (Type or Select)</label>
+                <input type="text" list="auth-list" id="authorities_contacted" value="" placeholder="Type or select authorities (e.g. Police)" class="glass-input" />
+                <datalist id="auth-list">
+                  <option value="Police">Police</option>
+                  <option value="Fire">Fire Department</option>
+                  <option value="Ambulance">Ambulance / EMS</option>
+                  <option value="None">None / Unknown</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="witnesses">Corroborating Witnesses</label>
+                <input type="number" id="witnesses" min="0" max="10" value="0" placeholder="0" class="glass-input" />
+              </div>
+
+              <div class="input-group">
+                <label for="police_report_available">Official Police Report Filed (Type or Select)</label>
+                <input type="text" list="police-rep-list" id="police_report_available" value="" placeholder="Type or select YES / NO" class="glass-input" />
+                <datalist id="police-rep-list">
+                  <option value="YES">YES (Report Available)</option>
+                  <option value="NO">NO (No Report Filed)</option>
+                </datalist>
+              </div>
+
+              <div class="input-group">
+                <label for="bodily_injuries">Bodily Injuries Incurred</label>
+                <input type="number" id="bodily_injuries" min="0" max="10" value="0" placeholder="0" class="glass-input" />
+              </div>
+            </div>
+
+            <div class="wizard-actions flex-between">
+              <button class="btn btn-secondary" onclick="goToStep(2)"><i class="fa-solid fa-arrow-left"></i> Back to Step 2</button>
+              <button class="btn btn-glow" onclick="executeClaimAssessment()">
+                <i class="fa-solid fa-bolt"></i> Execute AI Risk Assessment <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIZARD STEP 4: ADJUDICATION VERDICT & DOSSIER -->
+        <div class="wizard-step-pane" id="wizard-pane-4">
+          
+          <!-- Top Executive Result Cards -->
+          <div class="verdict-grid-3">
+            
+            <!-- Gauge Card -->
+            <div class="glass-card verdict-gauge-card">
+              <div class="card-caption">Consensus Risk Index</div>
+              <div class="radial-gauge-wrap">
+                <svg class="radial-gauge-svg" viewBox="0 0 120 120">
+                  <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                  <circle class="gauge-bar" id="gauge-fill" cx="60" cy="60" r="50"></circle>
+                </svg>
+                <div class="gauge-number" id="verdict-score">0.0%</div>
+              </div>
+              <div class="badge-pill" id="verdict-tier-badge">Low Risk Profile</div>
+            </div>
+
+            <!-- Operational Directive Card -->
+            <div class="glass-card verdict-directive-card">
+              <div class="card-caption">Operational Routing Directive</div>
+              <h2 class="directive-title" id="verdict-routing-title">Fast-Track Auto Settlement</h2>
+              <p class="directive-summary" id="verdict-summary">
+                Claim passes automated screening. Cleared for instant electronic ACH disbursement within 24 hours.
+              </p>
+              <div class="directive-chips">
+                <span class="telemetry-chip">Protocol: <b id="verdict-action-code">ACT-FT-200</b></span>
+                <span class="telemetry-chip">SLA: <b id="verdict-sla">&lt; 24 Hours</b></span>
+              </div>
+            </div>
+
+            <!-- Escrow & Financials Card -->
+            <div class="glass-card verdict-escrow-card">
+              <div class="card-caption">Escrow & Financial Liability</div>
+              <h3 class="escrow-status-text" id="verdict-escrow-status">Approved & Escrow Released</h3>
+              <div class="financial-summary-list">
+                <div><span>Claim Amount:</span> <b id="verdict-claim-amt">$0.00</b></div>
+                <div><span>Policy Deductible:</span> <b id="verdict-deductible">$0.00</b></div>
+                <div><span>Net Liability:</span> <b id="verdict-net-liability">$0.00</b></div>
+                <div><span>Police Report:</span> <b id="verdict-pol-rep">YES</b></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Detailed Telemetry & Explainability -->
+          <div class="verdict-grid-2">
+            
+            <!-- Model Telemetry & Impact Breakdown -->
+            <div class="glass-card">
+              <h4><i class="fa-solid fa-microchip"></i> Multi-Model Consensus Telemetry</h4>
+              <div class="model-bars">
+                <div class="bar-row">
+                  <div class="bar-label"><span>XGBoost Teacher</span><b id="teacher-prob-val">0.0%</b></div>
+                  <div class="progress-track"><div class="progress-fill teacher-fill" id="teacher-fill-bar" style="width: 0%;"></div></div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-label"><span>PyTorch Neural Student</span><b id="student-prob-val">0.0%</b></div>
+                  <div class="progress-track"><div class="progress-fill student-fill" id="student-fill-bar" style="width: 0%;"></div></div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-label"><span>Calibrated Consensus Score</span><b id="consensus-prob-val">0.0%</b></div>
+                  <div class="progress-track"><div class="progress-fill consensus-fill" id="consensus-fill-bar" style="width: 0%;"></div></div>
+                </div>
+              </div>
+
+              <h5 class="sub-heading"><i class="fa-solid fa-scale-balanced"></i> Feature Risk Impact Weights</h5>
+              <div id="feature-impacts-list" class="impacts-container"></div>
+            </div>
+
+            <!-- Forensic Risk Factors Alert List -->
+            <div class="glass-card">
+              <h4><i class="fa-solid fa-triangle-exclamation"></i> Identified Forensic Risk Indicators</h4>
+              <div id="risk-factors-container" class="factors-container"></div>
+
+              <div class="dossier-download-box" style="display: flex; gap: 10px;">
+                <button class="btn btn-primary btn-full" onclick="downloadJSONDossier()">
+                  <i class="fa-solid fa-file-arrow-down"></i> Download JSON Dossier
+                </button>
+                <button class="btn btn-glow btn-full" onclick="viewSettlementCertificate()">
+                  <i class="fa-solid fa-stamp"></i> View Official Certificate
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Verdict Navigation Actions -->
+          <div class="wizard-actions flex-between" style="margin-top: 1.5rem;">
+            <button class="btn btn-secondary" onclick="resetWizardForm()">
+              <i class="fa-solid fa-rotate-left"></i> Evaluate Another Claim
+            </button>
+            <button class="btn btn-primary" onclick="goToStep(1)">
+              <i class="fa-solid fa-pen-to-square"></i> Modify Claim Parameters
+            </button>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 2: BATCH CLAIMS PROCESSOR                                       -->
+      <!-- =================================================================== -->
+      <section id="tab-batch" class="tab-view">
+        <div class="batch-layout-grid">
+          
+          <!-- Left Controls -->
+          <div class="glass-card batch-controls-card">
+            <h3><i class="fa-solid fa-boxes-stacked"></i> Batch Processing Engine</h3>
+            <p>Run automated high-throughput risk screening across synthetic claims or upload custom CSV datasets.</p>
+
+            <div class="input-group">
+              <label for="batch-size-slider">Batch Simulation Size: <span id="batch-size-label" class="badge-value">20</span></label>
+              <input type="range" id="batch-size-slider" min="5" max="50" step="5" value="20" class="glass-range" oninput="document.getElementById('batch-size-label').innerText = this.value" />
+            </div>
+
+            <button class="btn btn-glow btn-full" onclick="runBatchSimulation()">
+              <i class="fa-solid fa-play"></i> Execute Batch Simulation
+            </button>
+
+            <div class="divider-text"><span>OR UPLOAD DATASET</span></div>
+
+            <div class="drop-zone" id="csv-drop-zone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p>Drag & Drop Claims CSV here or <span>Browse</span></p>
+              <input type="file" id="csv-file-input" accept=".csv" />
+            </div>
+          </div>
+
+          <!-- Right Results -->
+          <div class="glass-card batch-results-card">
+            <!-- Batch KPIs -->
+            <div class="kpi-grid-4">
+              <div class="kpi-box">
+                <span class="kpi-label">Total Exposure</span>
+                <h3 id="kpi-tot-exp">$0.00</h3>
+              </div>
+              <div class="kpi-box">
+                <span class="kpi-label">Frozen Fraud Escrow</span>
+                <h3 id="kpi-fraud-escrow" class="text-danger">$0.00</h3>
+              </div>
+              <div class="kpi-box">
+                <span class="kpi-label">Fast-Track Cleared</span>
+                <h3 id="kpi-fast-track" class="text-success">0 Claims</h3>
+              </div>
+              <div class="kpi-box">
+                <span class="kpi-label">Critical Fraud Flags</span>
+                <h3 id="kpi-fraud-flags" class="text-warning">0 Claims</h3>
+              </div>
+            </div>
+
+            <!-- Table Header and Download -->
+            <div class="table-header-flex">
+              <h4><i class="fa-solid fa-list-check"></i> Adjudicated Claims Register</h4>
+              <button class="btn btn-secondary btn-sm" id="btn-download-batch" onclick="downloadBatchCSV()" disabled>
+                <i class="fa-solid fa-download"></i> Export CSV
+              </button>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container">
+              <table class="glass-table" id="batch-table">
+                <thead>
+                  <tr>
+                    <th>Claim ID</th>
+                    <th>Amount</th>
+                    <th>Vehicle</th>
+                    <th>Incident</th>
+                    <th>Police Rep</th>
+                    <th>Risk Score</th>
+                    <th>Routing Action</th>
+                  </tr>
+                </thead>
+                <tbody id="batch-table-body">
+                  <tr>
+                    <td colspan="7" class="text-center empty-msg">No batch evaluated yet. Click 'Execute Batch Simulation' or upload a CSV file.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 3: SETTLEMENT CERTIFICATE (REPLACED RISK ANALYTICS)              -->
+      <!-- =================================================================== -->
+      <section id="tab-certificate" class="tab-view">
+        <div class="certificate-wrapper-card glass-card">
+          <div class="cert-controls-bar">
+            <div>
+              <h3><i class="fa-solid fa-certificate"></i> Official Adjudication Certificate</h3>
+              <p>Formal insurer clearance and SIU audit document generated for the active claim.</p>
+            </div>
+            <button class="btn btn-glow" onclick="window.print()">
+              <i class="fa-solid fa-print"></i> Print / Save Certificate
+            </button>
+          </div>
+
+          <!-- Printable Certificate Frame -->
+          <div class="official-certificate-frame" id="printable-certificate">
+            <div class="cert-border-inner">
+              
+              <div class="cert-header-row">
+                <div class="cert-seal-box">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>INSURAI AUDIT VERIFIED</span>
+                </div>
+                <div class="cert-title-center">
+                  <h2>OFFICIAL CLAIM RISK & SETTLEMENT CLEARANCE CERTIFICATE</h2>
+                  <p>Enterprise Neural Adjudication Protocol • National Insurance Security Standard</p>
+                </div>
+                <div class="cert-qr-box">
+                  <i class="fa-solid fa-qrcode"></i>
+                  <small id="cert-security-hash">SEC-VERIFIED-9104</small>
+                </div>
+              </div>
+
+              <div class="cert-divider-line"></div>
+
+              <div class="cert-details-grid">
+                <div class="cert-col">
+                  <h4><i class="fa-solid fa-file-invoice"></i> Claim Identification</h4>
+                  <p><b>Claim Reference:</b> <span id="cert-claim-id">CLM-941824</span></p>
+                  <p><b>Policyholder Age:</b> <span id="cert-policyholder-age">38 Years</span></p>
+                  <p><b>Tenure with Insurer:</b> <span id="cert-tenure">60 Months</span></p>
+                  <p><b>Jurisdiction State:</b> <span id="cert-state">OH</span></p>
+                </div>
+
+                <div class="cert-col">
+                  <h4><i class="fa-solid fa-car-burst"></i> Asset & Incident Diagnostics</h4>
+                  <p><b>Insured Vehicle:</b> <span id="cert-vehicle">BMW (2020)</span></p>
+                  <p><b>Incident Category:</b> <span id="cert-incident">Single Vehicle (Major)</span></p>
+                  <p><b>Impact Point:</b> <span id="cert-collision">Front</span></p>
+                  <p><b>Police Report:</b> <span id="cert-police">YES (Filed)</span></p>
+                </div>
+
+                <div class="cert-col">
+                  <h4><i class="fa-solid fa-sack-dollar"></i> Financial Liability</h4>
+                  <p><b>Total Claim Exposure:</b> <span id="cert-amount">$45,000.00</span></p>
+                  <p><b>Policy Deductible:</b> <span id="cert-deductible">$1,000.00</span></p>
+                  <p><b>Net Insurer Liability:</b> <span id="cert-liability">$44,000.00</span></p>
+                  <p><b>Prior Claims:</b> <span id="cert-prior-claims">1</span></p>
+                </div>
+              </div>
+
+              <div class="cert-verdict-box" id="cert-verdict-banner">
+                <div class="cert-verdict-left">
+                  <span class="cert-tag">CALIBRATED CONSENSUS SCORE</span>
+                  <h1 id="cert-score-display">15.0%</h1>
+                  <span class="cert-sub-tier" id="cert-tier-name">LOW RISK PROFILE</span>
+                </div>
+                <div class="cert-verdict-right">
+                  <span class="cert-tag">OPERATIONAL SETTLEMENT DIRECTIVE</span>
+                  <h2 id="cert-routing-name">Fast-Track Auto Settlement</h2>
+                  <p id="cert-action-directive">Claim passes automated screening. Cleared for instant electronic ACH disbursement within 24 hours.</p>
+                </div>
+              </div>
+
+              <div class="cert-signatures-row">
+                <div class="sig-box">
+                  <div class="sig-line"></div>
+                  <span>Authorized Claims Officer</span>
+                  <small id="cert-officer-signature">ADJ-9418 • Verified Digitally</small>
+                </div>
+                <div class="sig-box">
+                  <div class="sig-seal-stamp">
+                    <i class="fa-solid fa-certificate"></i>
+                    <span>AI CONSENSUS ENFORCED</span>
+                  </div>
+                </div>
+                <div class="sig-box">
+                  <div class="sig-line"></div>
+                  <span>SIU Fraud Investigation Director</span>
+                  <small>Automated Consensus Validation</small>
+                </div>
+              </div>
+
+              <div class="cert-footer-text">
+                This document is a certified digital audit record generated by InsurAI Neural Decision Support System. Tampering renders this certificate null and void.
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 4: CLAIM AUDIT HISTORY (NEW AUDIT LOG VIEW)                     -->
+      <!-- =================================================================== -->
+      <section id="tab-history" class="tab-view">
+        <div class="glass-card">
+          
+          <!-- History Header and Filter Toolbar -->
+          <div class="history-controls-bar">
+            <div>
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Claim Adjudication Audit Log</h3>
+              <p>Complete historical ledger of all individually assessed claims with full forensic telemetry.</p>
+            </div>
+            
+            <div class="history-actions-group">
+              <button class="btn btn-secondary btn-sm" onclick="exportHistoryCSV()">
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="clearClaimHistory()">
+                <i class="fa-solid fa-trash-can"></i> Clear History
+              </button>
+            </div>
+          </div>
+
+          <!-- History Summary KPIs -->
+          <div class="kpi-grid-4" style="margin-bottom: 1.5rem;">
+            <div class="kpi-box">
+              <span class="kpi-label">Total Claims Assessed</span>
+              <h3 id="hist-kpi-total">0 Claims</h3>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-label">Fast-Track Cleared</span>
+              <h3 id="hist-kpi-low" class="text-success">0 Claims</h3>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-label">High-Risk Fraud Flags</span>
+              <h3 id="hist-kpi-high" class="text-danger">0 Claims</h3>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-label">Total Indemnity Exposure</span>
+              <h3 id="hist-kpi-exposure">$0.00</h3>
+            </div>
+          </div>
+
+          <!-- Search & Filter Bar -->
+          <div class="history-search-group" style="margin-bottom: 1.25rem;">
+            <input type="text" id="history-search-input" class="glass-input" placeholder="Search by Claim ID, Vehicle, or Officer..." oninput="filterHistoryTable()" />
+            <select id="history-filter-tier" class="glass-input" style="max-width: 200px;" onchange="filterHistoryTable()">
+              <option value="ALL">All Risk Tiers</option>
+              <option value="LOW">Low Risk Profile</option>
+              <option value="MED">Medium Risk Profile</option>
+              <option value="HIGH">High Risk Profile</option>
+            </select>
+          </div>
+
+          <!-- History Table -->
+          <div class="table-container">
+            <table class="glass-table" id="history-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Claim ID</th>
+                  <th>Officer</th>
+                  <th>Vehicle & Customer</th>
+                  <th>Exposure ($)</th>
+                  <th>Risk Score</th>
+                  <th>Directive Action</th>
+                  <th style="text-align: center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <tr>
+                  <td colspan="8" class="text-center empty-msg">No claims evaluated yet. Use the Claim Assessment Wizard to evaluate claims.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Official Web Footer -->
+    <footer class="app-footer">
+      <div>🛡️ <b>InsurAI</b> • Automated Claim Risk & Fraud Detection Engine</div>
+      <div class="footer-links">
+        <span>Enterprise Neural Decision Support System</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

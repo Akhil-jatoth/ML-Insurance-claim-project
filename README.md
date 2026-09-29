@@ -114,27 +114,39 @@ python save_model.py
 
 ## 💻 6. Running the Applications
 
-### Option A: Interactive Streamlit Web UI (Recommended)
-Launch the modern web dashboard:
+### Option A: Enterprise Full-Stack Web App (Recommended)
+Launch the modern glassmorphic web portal (FastAPI backend + Interactive SPA Frontend):
+```bash
+python run_web.py
+```
+Access at `http://127.0.0.1:8000`. Features:
+- **Authentication Gateway / Login Screen** with role-based profile & 1-click instant demo access.
+- **Claim Assessment Wizard** with multi-step interactive evaluation, live radial gauge risk scoring, and multi-model consensus telemetry (XGBoost + Neural Student).
+- **Typeable / Searchable Comboboxes** supporting custom typed words or dropdown choices.
+- **Batch Processing Engine** for high-throughput automated risk screening with CSV upload/export.
+- **Official Settlement & SIU Audit Certificate Generator** with cryptographic verification hashes and 1-click print/PDF layout.
+- **Claim Audit History** ledger with search filters, summary KPIs, dossier inspection, and CSV export.
+
+### Option B: Streamlit Web UI
 ```bash
 streamlit run app.py
 ```
 Access at `http://localhost:8501`.
 
-### Option B: Command-Line Assessment (Interactive)
+### Option C: Command-Line Assessment (Interactive)
 To evaluate claims directly from the terminal:
 ```bash
 python manual_input.py
 ```
 
-### Option C: Instant Test Execution
+### Option D: Instant Test Execution
 Test automated batch / single claim inference:
 ```bash
 python test_user_input.py
 python test_random_claim.py
 ```
 
-### Option D: Jupyter Notebook
+### Option E: Jupyter Notebook
 Run the end-to-end research notebook:
 ```bash
 jupyter notebook ML_Project.ipynb
@@ -146,6 +158,12 @@ jupyter notebook ML_Project.ipynb
 
 ```
 ML-PROJECT/
+├── frontend/                                  # Full-Stack SPA Frontend
+│   ├── index.html                             # Web UI (Login, Wizard, Batch, Cert, History)
+│   ├── style.css                              # Glassmorphic Design System & Print Layouts
+│   └── app.js                                 # SPA Controller & State Management
+├── server.py                                  # FastAPI REST API Backend
+├── run_web.py                                 # Web Portal Launcher
 ├── Insurance_Fraud_Dataset_100K_Realistic.xlsx # 100K Insurance Dataset
 ├── ML_Project.ipynb                           # Complete Research Notebook
 ├── app.py                                     # Streamlit Web App Interface
