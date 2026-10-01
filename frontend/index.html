@@ -377,6 +377,24 @@
                 </datalist>
               </div>
 
+              <!-- Vehicle Damage Photos Upload (Matches standard input styling, directly below Damage Severity Rating) -->
+              <div class="input-group" id="vehicle-damage-upload-container">
+                <label for="vehicle_damage_photos">
+                  <span>Upload Vehicle Damage Photos (2 to 3 photos)</span>
+                  <span class="badge-value" id="damage-photos-counter" style="display: none;">0/3</span>
+                </label>
+                <div class="glass-input-file-wrapper" id="damage-photos-drop-zone">
+                  <input type="file" id="vehicle_damage_photos" accept="image/*" multiple class="glass-file-real" />
+                  <div class="glass-input glass-file-styled" id="damage-photos-box">
+                    <span class="glass-file-text" id="damage-photos-label-text">
+                      <i class="fa-solid fa-camera"></i> <span class="placeholder-text">Choose 2 to 3 photos (or drag &amp; drop)...</span>
+                    </span>
+                    <span class="glass-browse-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Browse</span>
+                  </div>
+                </div>
+                <div class="file-preview-strip" id="damage-photos-preview-grid"></div>
+              </div>
+
               <div class="input-group">
                 <label for="authorities_contacted">Authorities Contacted on Scene (Type or Select)</label>
                 <input type="text" list="auth-list" id="authorities_contacted" value="" placeholder="Type or select authorities (e.g. Police)" class="glass-input" />
@@ -395,11 +413,29 @@
 
               <div class="input-group">
                 <label for="police_report_available">Official Police Report Filed (Type or Select)</label>
-                <input type="text" list="police-rep-list" id="police_report_available" value="" placeholder="Type or select YES / NO" class="glass-input" />
+                <input type="text" list="police-rep-list" id="police_report_available" value="" placeholder="Type or select YES / NO" class="glass-input" oninput="updatePoliceReportVisibility()" onchange="updatePoliceReportVisibility()" />
                 <datalist id="police-rep-list">
                   <option value="YES">YES (Report Available)</option>
                   <option value="NO">NO (No Report Filed)</option>
                 </datalist>
+              </div>
+
+              <!-- Conditional Police Report Photo / Document Upload (Matches standard input styling) -->
+              <div class="input-group" id="police-report-upload-container" style="display: none;">
+                <label for="police_report_photo">
+                  <span>Upload Police Report Photo / Document</span>
+                  <span class="badge-value" id="police-report-status" style="display: none; font-size: 0.75rem;">Verified</span>
+                </label>
+                <div class="glass-input-file-wrapper" id="police-report-drop-zone">
+                  <input type="file" id="police_report_photo" accept="image/*,.pdf" class="glass-file-real" />
+                  <div class="glass-input glass-file-styled" id="police-report-box">
+                    <span class="glass-file-text" id="police-report-label-text">
+                      <i class="fa-solid fa-file-shield"></i> <span class="placeholder-text">Select police report photo or PDF...</span>
+                    </span>
+                    <span class="glass-browse-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Browse</span>
+                  </div>
+                </div>
+                <div class="file-preview-strip" id="police-report-preview-grid"></div>
               </div>
 
               <div class="input-group">

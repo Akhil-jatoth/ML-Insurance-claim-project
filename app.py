@@ -890,6 +890,18 @@ with tab_wizard:
             sev_opts = ["Minor", "Major", "Total Loss", "Trivial"]
             cd["incident_severity"] = st.selectbox("Damage Severity Rating", sev_opts, index=sev_opts.index(cd.get("incident_severity", "Major")) if cd.get("incident_severity") in sev_opts else 1)
 
+            damage_photos = st.file_uploader(
+                "📷 Upload Vehicle Damage Photos (2 to 3 photos)",
+                type=["jpg", "jpeg", "png", "webp"],
+                accept_multiple_files=True,
+                help="Upload 2 to 3 clear photos of the vehicle damage from different angles."
+            )
+            if damage_photos:
+                if len(damage_photos) > 3:
+                    st.warning("⚠️ Maximum 3 vehicle damage photos allowed. Only the first 3 will be processed.")
+                else:
+                    st.caption(f"✅ {len(damage_photos)} of 3 photos attached")
+
             col_opts = ["Front", "Rear", "Side", "Unknown"]
             cd["collision_type"] = st.selectbox("Primary Point of Impact", col_opts, index=col_opts.index(cd.get("collision_type", "Front")) if cd.get("collision_type") in col_opts else 0)
 
@@ -899,6 +911,16 @@ with tab_wizard:
 
             cd["witnesses"] = st.slider("Corroborating Third-Party Witnesses", min_value=0, max_value=6, value=int(cd.get("witnesses", 0)))
             cd["police_report_available"] = st.selectbox("Official Police Report Filed", ["YES", "NO"], index=0 if cd.get("police_report_available") == "YES" else 1)
+
+            if cd.get("police_report_available") == "YES":
+                police_doc = st.file_uploader(
+                    "📑 Upload Official Police Report Photo / Document",
+                    type=["jpg", "jpeg", "png", "pdf"],
+                    help="Upload official police accident verification report or FIR scan."
+                )
+                if police_doc:
+                    st.caption(f"🛡️ Verified Police Document: `{police_doc.name}`")
+
             cd["bodily_injuries"] = st.slider("Bodily Injuries Incurred", min_value=0, max_value=4, value=int(cd.get("bodily_injuries", 0)))
 
         st.markdown("<br>", unsafe_allow_html=True)

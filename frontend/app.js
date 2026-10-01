@@ -7,6 +7,9 @@ let lastAssessmentResult = null;
 let currentBatchData = [];
 let claimHistory = [];
 
+let vehicleDamagePhotos = [];
+let policeReportDocument = null;
+
 let activeUser = {
   officerId: "ADJ-9418",
   email: "officer.akhil@insurai-claims.com",
@@ -15,6 +18,8 @@ let activeUser = {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupDropZone();
+  setupPhotoUploaders();
+  updatePoliceReportVisibility();
   initClaimHistory();
 
   // Check if session exists in memory
@@ -171,6 +176,13 @@ function resetWizardForm() {
   currentStep = 1;
   lastAssessmentResult = null;
   
+  // Clear uploaded evidence photos
+  vehicleDamagePhotos = [];
+  policeReportDocument = null;
+  renderDamagePhotosPreview();
+  renderPoliceReportPreview();
+  updatePoliceReportVisibility();
+
   // Set all values to empty null or 0 with placeholders showing
   const emptyFields = [
     "customer_age", "months_as_customer", "insured_sex", "insured_education_level",
@@ -296,6 +308,7 @@ function loadPreset(presetKey) {
       el.value = val;
     }
   }
+  updatePoliceReportVisibility();
 }
 
 // ==============================================================================
@@ -580,6 +593,244 @@ function setupDropZone() {
       processUploadedCSV(e.target.files[0]);
     }
   });
+}
+
+// Setup Vehicle Damage Photos (2-3 Photos) and Police Report Uploaders
+function setupPhotoUploaders() {
+  // 1. Vehicle Damage Photos Uploader
+  const damageDropZone = document.getElementById("damage-photos-drop-zone");
+  const damageFileInput = document.getElementById("vehicle_damage_photos");
+
+  if (damageDropZone && damageFileInput) {
+    damageDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      damageDropZone.classList.add("dragover");
+    });
+
+    damageDropZone.addEventListener("dragleave", () => {
+      damageDropZone.classList.remove("dragover");
+    });
+
+    damageDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      damageDropZone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleDamagePhotosAdded(Array.from(e.dataTransfer.files));
+      }
+    });
+
+    damageFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleDamagePhotosAdded(Array.from(e.target.files));
+        damageFileInput.value = "";
+      }
+    });
+  }
+
+  // 2. Police Report Photo / Document Uploader
+  const policeDropZone = document.getElementById("police-report-drop-zone");
+  const policeFileInput = document.getElementById("police_report_photo");
+
+  if (policeDropZone && policeFileInput) {
+    policeDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      policeDropZone.classList.add("dragover");
+    });
+
+    policeDropZone.addEventListener("dragleave", () => {
+      policeDropZone.classList.remove("dragover");
+    });
+
+    policeDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      policeDropZone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handlePoliceReportAdded(e.dataTransfer.files[0]);
+      }
+    });
+
+    policeFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handlePoliceReportAdded(e.target.files[0]);
+        policeFileInput.value = "";
+      }
+    });
+  }
+
+  // 3. Conditional Visibility for Police Report Upload on police_report_available input
+  const polInput = document.getElementById("police_report_available");
+  if (polInput) {
+    ["input", "change", "keyup", "blur"].forEach(evt => {
+      polInput.addEventListener(evt, updatePoliceReportVisibility);
+    });
+  }
+}
+
+function updatePoliceReportVisibility() {
+  const polInput = document.getElementById("police_report_available");
+  const policeContainer = document.getElementById("police-report-upload-container");
+  if (!polInput || !policeContainer) return;
+
+  const val = (polInput.value || "").trim().toUpperCase();
+  const isYes = val === "YES" || val.includes("YES") || val.startsWith("Y") || val === "1" || val === "TRUE";
+
+  if (isYes) {
+    policeContainer.style.setProperty("display", "flex", "important");
+  } else {
+    policeContainer.style.setProperty("display", "none", "important");
+  }
+}
+
+function formatFileSize(bytes) {
+  if (!bytes || bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function handleDamagePhotosAdded(files) {
+  const validFiles = files.filter(f => f.type.startsWith("image/"));
+  if (validFiles.length === 0) {
+    alert("Please select valid image files (JPG, PNG, WebP).");
+    return;
+  }
+
+  const remainingSlots = 3 - vehicleDamagePhotos.length;
+  if (remainingSlots <= 0) {
+    alert("Maximum of 3 vehicle damage photos can be attached. Please remove an existing photo to upload a new one.");
+    return;
+  }
+
+  const filesToAdd = validFiles.slice(0, remainingSlots);
+  if (validFiles.length > remainingSlots) {
+    alert(`Only ${remainingSlots} more photo(s) could be added. Maximum 3 photos allowed.`);
+  }
+
+  filesToAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      vehicleDamagePhotos.push({
+        file: file,
+        dataUrl: e.target.result,
+        name: file.name,
+        size: file.size
+      });
+      renderDamagePhotosPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeDamagePhoto(index) {
+  vehicleDamagePhotos.splice(index, 1);
+  renderDamagePhotosPreview();
+}
+
+function renderDamagePhotosPreview() {
+  const container = document.getElementById("damage-photos-preview-grid");
+  const labelText = document.getElementById("damage-photos-label-text");
+  const counter = document.getElementById("damage-photos-counter");
+  if (!container) return;
+
+  const count = vehicleDamagePhotos.length;
+
+  // Update input placeholder / text
+  if (labelText) {
+    if (count === 0) {
+      labelText.innerHTML = `<i class="fa-solid fa-camera"></i> <span class="placeholder-text">Choose 2 to 3 photos (or drag &amp; drop)...</span>`;
+    } else {
+      labelText.innerHTML = `<i class="fa-solid fa-camera" style="color: #38bdf8;"></i> <span style="color: #f8fafc; font-weight: 600;">${count} vehicle photo${count > 1 ? 's' : ''} attached</span>`;
+    }
+  }
+
+  // Update badge counter if present
+  if (counter) {
+    counter.innerText = `${count}/3`;
+    counter.style.display = count > 0 ? "inline" : "none";
+  }
+
+  // Render compact chips
+  container.innerHTML = vehicleDamagePhotos.map((photo, idx) => `
+    <div class="file-chip">
+      <img src="${photo.dataUrl}" alt="Photo ${idx + 1}" class="file-chip-thumb" />
+      <span class="file-chip-name" title="${photo.name}">${photo.name}</span>
+      <span class="file-chip-size">${formatFileSize(photo.size)}</span>
+      <button type="button" class="file-chip-remove" title="Remove photo" onclick="event.stopPropagation(); removeDamagePhoto(${idx});">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  `).join("");
+}
+
+function handlePoliceReportAdded(file) {
+  const isImage = file.type.startsWith("image/");
+  const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+  if (!isImage && !isPdf) {
+    alert("Please upload a valid image (JPG, PNG, WebP) or PDF file for the police report.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    policeReportDocument = {
+      file: file,
+      dataUrl: e.target.result,
+      isPdf: isPdf,
+      name: file.name,
+      size: file.size
+    };
+    renderPoliceReportPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePoliceReport() {
+  policeReportDocument = null;
+  renderPoliceReportPreview();
+}
+
+function renderPoliceReportPreview() {
+  const container = document.getElementById("police-report-preview-grid");
+  const labelText = document.getElementById("police-report-label-text");
+  const statusBadge = document.getElementById("police-report-status");
+  if (!container) return;
+
+  if (!policeReportDocument) {
+    container.innerHTML = "";
+    if (labelText) {
+      labelText.innerHTML = `<i class="fa-solid fa-file-shield"></i> <span class="placeholder-text">Select police report photo or PDF...</span>`;
+    }
+    if (statusBadge) {
+      statusBadge.style.display = "none";
+    }
+    return;
+  }
+
+  if (labelText) {
+    labelText.innerHTML = `<i class="fa-solid fa-file-shield" style="color: #c084fc;"></i> <span style="color: #f8fafc; font-weight: 600;">${policeReportDocument.name}</span>`;
+  }
+
+  if (statusBadge) {
+    statusBadge.style.display = "inline";
+    statusBadge.innerText = "Attached";
+  }
+
+  container.innerHTML = `
+    <div class="file-chip">
+      ${policeReportDocument.isPdf ? `
+        <i class="fa-solid fa-file-pdf file-chip-doc-icon"></i>
+      ` : `
+        <img src="${policeReportDocument.dataUrl}" alt="Police Report" class="file-chip-thumb" />
+      `}
+      <span class="file-chip-name" title="${policeReportDocument.name}">${policeReportDocument.name}</span>
+      <span class="file-chip-size">${formatFileSize(policeReportDocument.size)}</span>
+      <button type="button" class="file-chip-remove" title="Remove report" onclick="event.stopPropagation(); removePoliceReport();">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  `;
 }
 
 function processUploadedCSV(file) {
